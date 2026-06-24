@@ -1,6 +1,17 @@
 'use client'
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect, Fragment } from 'react'
 import styles from './page.module.css'
+
+function renderMd(text: string) {
+  return text.split('\n\n').map((para, pi) => {
+    const parts = para.split(/(\*\*[^*]+\*\*)/g).map((chunk, ci) =>
+      chunk.startsWith('**') && chunk.endsWith('**')
+        ? <strong key={ci}>{chunk.slice(2, -2)}</strong>
+        : <Fragment key={ci}>{chunk}</Fragment>
+    )
+    return <p key={pi} style={{ margin: '0 0 0.5em' }}>{parts}</p>
+  })
+}
 
 type Source = { title: string; url: string; source: string; excerpt: string }
 type Message = { role: 'user' | 'assistant'; content: string; sources?: Source[] }
@@ -103,7 +114,7 @@ export default function Home() {
               <div className={styles.avatar}>AI</div>
             )}
             <div className={styles.bubble}>
-              <p>{m.content}</p>
+              {m.role === 'assistant' ? renderMd(m.content) : <p>{m.content}</p>}
               {m.sources && m.sources.length > 0 && (
                 <div className={styles.sources}>
                   <p className={styles.sourcesLabel}>Sources</p>
